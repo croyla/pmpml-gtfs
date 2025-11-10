@@ -1,3 +1,14 @@
+# PMPML GTFS
+
+### Files
+
+- pmpml_gtfs.zip: API data -> GTFS, contains IDs used by the API
+- pmpml_gtfs_compat.zip: GTFS patched to merge different directions and use direction_id in trips.
+
+### Notes
+
+- The stop_times are not accurate with ground timings. They have been calculated assuming a vehicle travelling at 20 kmph. Only the start times / first stop's times are served from PMPML end.
+
 # PMPML GTFS Generator
 
 A Python application that fetches transit data from the PMPML (Pune Mahanagar Parivahan Mahamandal Limited) API and generates a GTFS (General Transit Feed Specification) dataset.
@@ -47,7 +58,7 @@ poetry install
 Run the script to generate the complete GTFS dataset:
 
 ```bash
-python gtfs_parallel.py
+python gtfs_parallel.py && python gtfs_compat.py
 ```
 
 The script will:
@@ -314,7 +325,8 @@ Times follow GTFS conventions:
 ```
 .
 ├── gtfs_parallel.py          # Main application script
-├── api-doc.yaml    # Swagger API documentation
+├── gtfs_compat.py            # Post processing script
+├── api-doc.yaml              # Swagger API documentation
 ├── README.md                 # This file
 ├── latest.log                # Log file (generated)
 ├── gtfs_pmpml/               # Output directory (generated)
@@ -325,7 +337,8 @@ Times follow GTFS conventions:
 │   ├── stops.txt
 │   ├── shapes.txt
 │   └── calendar.txt
-└── pmpml_gtfs.zip            # Compressed output (generated)
+├── pmpml_gtfs.zip            # Compressed output (generated)
+└── pmpml_gtfs_compat.zip     # Compressed output of compatibility script
 ```
 
 ## Contributing

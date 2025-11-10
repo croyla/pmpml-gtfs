@@ -384,7 +384,11 @@ try:
         route_mappings[route_long_name] = route_id
 
         short_name = route["route"]
-        long_name = f"{route['start']} to {route['end']}"
+        # Add direction to long_name if available
+        direction_label = ""
+        if "direction" in route:
+            direction_label = f" ({"UP" if route['direction'] == 0 else "DOWN"})"
+        long_name = f"{route['start']} to {route['end']}{direction_label}"
         routes_data.append([route_id, "PMPML", short_name, long_name, 3])  # 3 = Bus
 
         try:
