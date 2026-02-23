@@ -1,3 +1,4 @@
 gtfs_pmpml/
 *.log
 tmp/
+.idea/
