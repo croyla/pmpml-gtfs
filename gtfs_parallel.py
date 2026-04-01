@@ -49,6 +49,7 @@ logger = logging.getLogger()
 
 # Base URL for PMPML API
 BASE_URL = "https://prod-pmpml-routesapi.chartr.in"
+BASE_SCHEDULES_URL = "https://schedule-api.chartr.in/schedules/pune/"
 API_KEY = "test"
 
 # Headers for API requests
@@ -470,12 +471,20 @@ def process_route_trips(route_id, route, trip_schedules):
 def fetch_route_details(route_long_name, route_id):
     """Fetch transit route details for a given route."""
     try:
+        response = requests.get(f"{BASE_SCHEDULES_URL}{route_long_name}", headers=HEADERS)
+        response.raise_for_status()
+        schedules_json = response.json()
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error fetching schedules for route {route_long_name}: {e}")
+        schedules_json = {}
+    try:
         response = requests.get(f"{BASE_URL}/transit_route_details?route={route_long_name}", headers=HEADERS)
         response.raise_for_status()
         route_details_json = response.json()
 
+
         for route in route_details_json.get("transit_route", []):
-            trip_schedules = route.get("trips_schedule", [])
+            trip_schedules = schedules_json.get("data", {}).get("schedule", [])
             if not trip_schedules:
                 logger.warning(f"No trip schedules found for route {route_long_name}")
                 continue
