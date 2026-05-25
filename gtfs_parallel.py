@@ -510,6 +510,45 @@ stop_times_df = pd.DataFrame(stop_times_data).drop_duplicates()
 stops_df = pd.DataFrame(stops_data).drop_duplicates()
 shapes_df = pd.DataFrame(shapes_data).drop_duplicates()
 
+# Orphan cleanup — remove records with no referencing rows in dependent tables
+logger.info("Cleaning up orphan records...")
+
+_hdr = lambda df: df.iloc[:1]
+_dat = lambda df: df.iloc[1:]
+
+# Trips with no stop times (col 0 of stop_times = trip_id; col 2 of trips = trip_id)
+trip_ids_with_stops = set(_dat(stop_times_df)[0])
+valid_trips_mask = _dat(trips_df)[2].isin(trip_ids_with_stops)
+n_removed_trips = (~valid_trips_mask).sum()
+trips_df = pd.concat([_hdr(trips_df), _dat(trips_df)[valid_trips_mask]])
+
+# Routes with no trips (col 0 of trips = route_id; col 0 of routes = route_id)
+route_ids_with_trips = set(_dat(trips_df)[0])
+valid_routes_mask = _dat(routes_df)[0].isin(route_ids_with_trips)
+n_removed_routes = (~valid_routes_mask).sum()
+routes_df = pd.concat([_hdr(routes_df), _dat(routes_df)[valid_routes_mask]])
+
+# Shapes with no trips (col 5 of trips = shape_id; col 0 of shapes = shape_id)
+shape_ids_in_trips = set(_dat(trips_df)[5])
+valid_shapes_mask = _dat(shapes_df)[0].isin(shape_ids_in_trips)
+n_removed_shape_ids = len(set(_dat(shapes_df)[0]) - shape_ids_in_trips)
+n_removed_shape_pts = (~valid_shapes_mask).sum()
+shapes_df = pd.concat([_hdr(shapes_df), _dat(shapes_df)[valid_shapes_mask]])
+
+# Stops with no stop times (col 3 of stop_times = stop_id; col 0 of stops = stop_id)
+stop_ids_in_stop_times = set(_dat(stop_times_df)[3])
+valid_stops_mask = _dat(stops_df)[0].isin(stop_ids_in_stop_times)
+n_removed_stops = (~valid_stops_mask).sum()
+stops_df = pd.concat([_hdr(stops_df), _dat(stops_df)[valid_stops_mask]])
+
+if any([n_removed_trips, n_removed_routes, n_removed_shape_ids, n_removed_stops]):
+    logger.warning(
+        f"🗑️  Orphan cleanup: removed {n_removed_routes} route(s), {n_removed_trips} trip(s), "
+        f"{n_removed_shape_ids} shape(s) ({n_removed_shape_pts} pts), {n_removed_stops} stop(s)"
+    )
+else:
+    logger.info("✅ No orphan records found")
+
 routes_df.to_csv(f"{OUTPUT_DIR}/routes.txt", index=False, header=False)
 trips_df.to_csv(f"{OUTPUT_DIR}/trips.txt", index=False, header=False)
 stop_times_df.to_csv(f"{OUTPUT_DIR}/stop_times.txt", index=False, header=False)
@@ -522,8 +561,10 @@ with open(f"{OUTPUT_DIR}/agency.txt", "w") as f:
         "agency_id,agency_name,agency_url,agency_timezone,agency_phone,agency_email\nPMPML,Pune Mahanagar Parivahan Mahamandal Limited,https://www.pmpml.org,Asia/Kolkata,+91 02024545454,complaints@pmpml.org\n")
 
 with open(f"{OUTPUT_DIR}/feed_info.txt", "w") as f:
-    f.write("feed_publisher_name,feed_publisher_url,feed_lang,feed_start_date,feed_end_date\nAayush Rai,https://github.com/croyla,en,"
-            f"{datetime.now().strftime('%Y%m%d')},{(datetime.now() + timedelta(days=180)).strftime('%Y%m%d')}\n")
+    f.write(
+        "feed_publisher_name,feed_publisher_url,feed_lang,feed_start_date,feed_end_date,feed_contact_url\n"
+        f"BLRTransit,https://blrtransit.com,en,{datetime.now().strftime('%Y%m%d')},{(datetime.now() + timedelta(days=180)).strftime('%Y%m%d')},https://blrtransit.com\n"
+    )
 
 with open(f"{OUTPUT_DIR}/calendar.txt", "w") as f:
     f.write(

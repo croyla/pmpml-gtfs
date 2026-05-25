@@ -5,10 +5,6 @@
 - pmpml_gtfs.zip: API data -> GTFS, contains IDs used by the API
 - pmpml_gtfs_compat.zip: GTFS patched to merge different directions and use direction_id in trips.
 
-### Notes
-
-- The stop_times are not accurate with ground timings. They have been calculated assuming a vehicle travelling at 20 kmph. Only the start times / first stop's times are served from PMPML end.
-
 # PMPML GTFS Generator
 
 A Python application that fetches transit data from the PMPML (Pune Mahanagar Parivahan Mahamandal Limited) API and generates a GTFS (General Transit Feed Specification) dataset.
@@ -25,6 +21,7 @@ This tool connects to the Apli-PMPML (Chartr) API to retrieve bus route informat
 - Advanced stop-to-shape matching algorithm with fallback mechanism
 - Polyline refinement for accurate distance calculations
 - Automatic GTFS dataset generation with proper formatting
+- Delete orphan data
 - Compressed ZIP archive output
 - Detailed logging to both console and file
 - Support for midnight-crossing trips
