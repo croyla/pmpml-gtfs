@@ -2,8 +2,6 @@
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
-# shellcheck source=.env
-set -a; source .env; set +a
 git pull origin main
 # ── 1. Call pre-run.sh ────────────────────────────────────────────────────────
  bash pre-run.sh
@@ -54,8 +52,8 @@ SOURCE_URL="https://raw.githubusercontent.com/${REPO}/main/pmpml_gtfs.zip"
 COMPAT_SRC_URL="https://raw.githubusercontent.com/${REPO}/main/pmpml_gtfs_compat.zip"
 COMPARE_URL="https://raw.githubusercontent.com/${REPO}/${BRANCH}/pmpml_gtfs.zip"
 COMPAT_COMPARE_URL="https://raw.githubusercontent.com/${REPO}/${BRANCH}/pmpml_gtfs_compat.zip"
-COMPARE_LINK="https://gtfs.blrtransit.com/?source=${SOURCE_URL}&compare=${COMPARE_URL}&gh_token=${GH_AUTH}"
-COMPAT_COMPARE_LINK="https://gtfs.blrtransit.com/?source=${COMPAT_SRC_URL}&compare=${COMPAT_COMPARE_URL}&gh_token=${GH_AUTH}"
+COMPARE_LINK="https://gtfs.blrtransit.com/?source=${SOURCE_URL}&compare=${COMPARE_URL}"
+COMPAT_COMPARE_LINK="https://gtfs.blrtransit.com/?source=${COMPAT_SRC_URL}&compare=${COMPAT_COMPARE_URL}"
 gh pr create --base main --head "$BRANCH" --title "Automated GTFS dataset update ($BRANCH)" --body "Automated PR to merge regenerated GTFS dataset from branch \`$BRANCH\` into main. View and compare [here for gtfs.zip](${COMPARE_LINK}), [and here for gtfs_compat.zip](${COMPAT_COMPARE_LINK})." --repo "$REPO"
 # ── 6. Change working tree back to main branch, delete $BRANCH locally ─────────
 git checkout main
