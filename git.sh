@@ -2,8 +2,6 @@
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
-# shellcheck source=.env
-set -a; source .env; set +a
 git pull origin main
 # ── 1. Call pre-run.sh ────────────────────────────────────────────────────────
  bash pre-run.sh
